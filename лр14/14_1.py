@@ -1,0 +1,5 @@
+f = lambda x,y: ((x+y)/(x**2 + x*y + y**2)) + (x/(1+y**2)) + (y/(1+x**2))
+z = lambda u,v: f(u,v) + f(u+v,u*v) + f(u**2,v**2) + f(0.1,0.1)
+u = float(input('u = '))
+v = float(input('v = '))
+print('z(u,v) =',z(u,v))

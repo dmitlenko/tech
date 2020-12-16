@@ -1,0 +1,7 @@
+cor = ("Інформатика", "вивчається", "навіть", "у", 1, "класі")
+print(cor)
+print('len ->',len(cor))
+print('2 ->', cor[2])
+print('3-6 ->', cor[2:6])
+print('=1 ->',cor.count(1))
+print('навіть ->',cor.index('навіть'))
