@@ -2,7 +2,7 @@ from tkinter import *
 from tkinter.ttk import *
 from math import *
 from json import dumps
-from time import sleep
+from datetime import datetime
 
 class ButtonSlider(Frame):
     def __init__(self,master,inc_dec,value,max_,min_,label='',onchange=None):
@@ -115,7 +115,7 @@ class MainWindow(Tk):
             canvas.create_rectangle(0, 0, self.width, self.height, fill='#ffffff')
             for x in range(0,self.width+1,8):
                 canvas.create_line(x, 0, x, self.height, fill=self.grid_color)
-            for y in range(0,self.height+1,8):
+            for y in range(self.center - 800,self.height+1,8):
                 canvas.create_line(0, y, self.width, y, fill=self.grid_color)
                 
         def drawData():
@@ -312,6 +312,13 @@ class MainWindow(Tk):
             tut.title('Як користуватися')
             Label(tut,text=tutorial_text).pack(fill=BOTH,expand=0)
             self.eval(f'tk::PlaceWindow {str(tut)} center')
+        def conf(*args):
+            if self.winfo_width() != self.window_width or self.winfo_height() != self.window_height:
+                self.window_width = self.winfo_width()
+                self.window_height = self.height = self.winfo_height()
+                self.width = self.winfo_width()
+                self.center = self.height//2
+                print('boob',datetime.now())
 
         cLineEnable = IntVar()
         funcType = IntVar()
@@ -332,7 +339,7 @@ class MainWindow(Tk):
         animVar.trace_add("write",animate)
         
         canvas = Canvas(self, width = self.width, height = self.height,borderwidth=2, relief="groove")
-        controlFrame = LabelFrame(self,text='Властивості')
+        self.c = controlFrame = LabelFrame(self,text='Властивості')
 
         bs1 = ButtonSlider(controlFrame,1,self.x_inc,100,1,'Інкремент Х',bs1_change)
         bs2 = ButtonSlider(controlFrame,0.01,self.x_fac,1,0.00,'Фактор Х',bs2_change)
@@ -353,11 +360,12 @@ class MainWindow(Tk):
         lb1 = Listbox(controlFrame,width=31,height=8)
         
         lb1.bind('<<ListboxSelect>>',listSelect)
+        self.bind('<Configure>',conf)
         canvas.pack(side=LEFT,fill=BOTH,expand=1)
         funcType.trace_add('write',func_write)
         drawGrid()
         drawLines()
-        
+
         controlFrame.pack(side=LEFT,fill=Y)
         bs1.grid(column=0,row=0,sticky=NW)
         bs2.grid(column=0,row=1,sticky=NW)
@@ -380,10 +388,11 @@ class MainWindow(Tk):
         b1.grid()
 
         showTutorial()
+        
 
 if __name__ == '__main__':
     app = MainWindow(None)
-    app.resizable(False, False)
+    #app.resizable(False, False)
     app.title('Графік функцій')
     app.geometry('800x642')
     app.eval('tk::PlaceWindow . center')
