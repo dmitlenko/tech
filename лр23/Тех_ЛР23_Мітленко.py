@@ -12,8 +12,11 @@ class ButtonSlider(Frame):
         self.labelText = label
         self.min = min_
         self.max = max_
-        self.initUI()
+        self.var = StringVar()
         self._onchange = onchange
+        self.var.set(value)
+        self.initUI()
+        
 
     def updateView(self):
         self.entry.delete(0,END)
@@ -31,14 +34,29 @@ class ButtonSlider(Frame):
             self.updateView()
             self._onchange(self)
 
+    def var_change(self,*args):
+        try:
+            if isinstance(self.value,float):
+                val = float(self.var.get())
+            else:
+                val = int(self.var.get())
+            if self.min <= val <= self.max:
+                self.value = val
+                self._onchange(self)
+                self.updateView()
+        except: 
+            pass
+
     def initUI(self):
         self.but_min = b1 = Button(self,text="-" + str(round(self.inc_dec,2)),width=7)
         self.but_add = b2 = Button(self,text="+" + str(round(self.inc_dec,2)),width=7)
-        self.entry   = e1 = Entry(self,width=12)
+        self.entry   = e1 = Entry(self,width=12,textvariable=self.var)
         self.label   = l1 = Label(self,text=self.labelText + ':',width=12)
+        v1 = self.var
 
         b1.bind('<Button-1>', self.dec)
         b2.bind('<Button-1>', self.inc)
+        v1.trace_add('write', self.var_change)
 
         l1.grid(column=1,row=0)
         b1.grid(column=0,row=1)
@@ -113,9 +131,9 @@ class MainWindow(Tk):
 
         def drawGrid():
             canvas.create_rectangle(0, 0, self.width, self.height, fill='#ffffff')
-            for x in range(0,self.width+1,8):
+            for x in range(0,self.width,8):
                 canvas.create_line(x, 0, x, self.height, fill=self.grid_color)
-            for y in range(self.center - 800,self.height+1,8):
+            for y in range(0,self.height+1,8):
                 canvas.create_line(0, y, self.width, y, fill=self.grid_color)
                 
         def drawData():
@@ -125,8 +143,8 @@ class MainWindow(Tk):
 
         def drawSin():
             xy1 = []
-
             fun = { 0:lambda x: sin(x), 1:lambda x: cos(x), 2:lambda x: tan(x),3:None }[funcType.get()]
+            typ = ['sin(x)','cos(x)','tg(x)',self.my_func][funcType.get()]
             for x in range(self.width):
                 xy1.append(x * self.x_inc)
                 if funcType.get() == 3:
@@ -137,6 +155,7 @@ class MainWindow(Tk):
                 else:
                     xy1.append(int(fun((x * self.x_fac) + self.x_bias + self.anim) * self.y_amp) + self.center)
             canvas.create_line(xy1,fill=self.func_color)
+            canvas.create_text(10,self.height-29,anchor=NW,text='y = '+typ,font=("Arail", 14))
             self.dots = xy1
             drawLines()
             invert_canvas()
@@ -145,7 +164,7 @@ class MainWindow(Tk):
             if cLineEnable.get(): canvas.create_line(0, self.center, self.width, self.center, fill=self.lines_color)
             if cVertEnable.get(): canvas.create_line(self.width//2, 0, self.width//2, self.height, fill=self.lines_color)
 
-        def update():
+        def update(event=None):
             canvas.delete("all")
             drawGrid()
             drawData()
@@ -155,19 +174,25 @@ class MainWindow(Tk):
                 string = str(self.dots[i]) + ' : ' + str(self.dots[i+1])
                 lb1.insert(i-1,string)
             b2.config(state=ACTIVE)
-            
+            self.ar = []
+            for i in range(0,len(self.dots)-1,2):
+                self.ar.append( [self.dots[i],self.dots[i+1]] )
         
         def bs1_change(event):
             self.x_inc = event.value
+            update()
 
         def bs2_change(event):
             self.x_fac = event.value
+            update()
 
         def bs3_change(event):
             self.y_amp = event.value
+            update()
         
         def bs4_change(event):
             self.x_bias = event.value
+            update()
 
         def point(pointCoord,size):
             x1, y1 = (pointCoord[0] - size), (pointCoord[1] - size)
@@ -182,6 +207,7 @@ class MainWindow(Tk):
                 drawData()
                 drawSin()
                 point(pointCoord,3)
+                canvas.create_text(pointCoord[0] + 5,pointCoord[1] - 24,anchor=NW,text='(%i,%i)'%(pointCoord[0],pointCoord[1]),font=("Arail", 10))
             except:
                 pass
             
@@ -206,6 +232,7 @@ class MainWindow(Tk):
                 self.grid_color = drop1_var.get()
                 self.lines_color= drop2_var.get()
                 sett.destroy()
+                update()
 
             def updateShow(*args):
                 try:
@@ -218,6 +245,7 @@ class MainWindow(Tk):
             sett.resizable(False, False)
             sett.title('Налаштування')
             sett.geometry('290x190')
+            self.eval(f'tk::PlaceWindow {str(sett)} center')
 
             drop1_var = StringVar()
             drop2_var = StringVar()
@@ -238,8 +266,8 @@ class MainWindow(Tk):
             drop1 = OptionMenu(sett,drop1_var,*colors(self.grid_color,self.default_grid_color))
             drop2 = OptionMenu(sett,drop2_var,*colors(self.lines_color,self.default_lines_color))
             drop3 = OptionMenu(sett,drop3_var,*colors(self.func_color,self.default_lines_color))
-            chec1 = Checkbutton(sett,text='Debug',onvalue=1,offvalue=0,variable=enableDataDrawing)
-            chec2 = Checkbutton(sett,text='Invert',onvalue=1,offvalue=0,variable=invertCanvas)
+            chec1 = Checkbutton(sett,text='Дод. інфо.',onvalue=1,offvalue=0,variable=enableDataDrawing)
+            chec2 = Checkbutton(sett,text='Темна тема',onvalue=1,offvalue=0,variable=invertCanvas)
             show1 = Label(sett,text='',width=drop_width)
             show2 = Label(sett,text='',width=drop_width)
             show3 = Label(sett,text='',width=drop_width)
@@ -286,6 +314,7 @@ class MainWindow(Tk):
                 child.configure(state = a)
             s1.configure(state=a)
             l1.configure(state=a)
+            update()
 
         def showTutorial():
             tutorial_text = """
@@ -303,22 +332,63 @@ class MainWindow(Tk):
             зображується на графіку.\n
             \tНалаштування - кнопка, яка показує вікно налаштувань.\n
             \tПоказати JSON - кнопка, яка показує координати всіх точок у форматі JSON.\n
-            \tОновити - кнопка, яка оновлює графік.\n
             """
             self.tut = tut = Toplevel(self)
-            tut.geometry('480x460')
+            tut.geometry('480x400')
             tut.resizable(False,False)
             tut.attributes('-topmost','true')
             tut.title('Як користуватися')
             Label(tut,text=tutorial_text).pack(fill=BOTH,expand=0)
             self.eval(f'tk::PlaceWindow {str(tut)} center')
-        def conf(*args):
-            if self.winfo_width() != self.window_width or self.winfo_height() != self.window_height:
-                self.window_width = self.winfo_width()
-                self.window_height = self.height = self.winfo_height()
-                self.width = self.winfo_width()
-                self.center = self.height//2
-                print('boob',datetime.now())
+
+        def showAbout():
+            about = """
+            Графік функції
+            Створив Денис Мітленко
+            2020 рік
+            """
+            ab = Toplevel(self)
+            ab.geometry('280x80')
+            ab.resizable(False,False)
+            ab.attributes('-topmost','true')
+            ab.title('Про програму')
+            Label(ab,text=about).pack(fill=BOTH,expand=0)
+            self.eval(f'tk::PlaceWindow {str(ab)} center')
+
+        def e1_ret(*args):
+            self.my_func = myFuncVar.get()
+            update()
+
+        def canvas_motion(event):
+            for i in self.ar:
+                if sqrt((event.x - i[0]) ** 2 + (event.y - i[1]) ** 2) <= 4:
+                    pointCoord = i
+                    canvas.delete("all")
+                    drawGrid()
+                    drawData()
+                    drawSin()
+                    point(pointCoord,3)
+                    canvas.create_text(i[0] + 5,i[1] - 24,anchor=NW,text='(%i;%i)'%(i[0],i[1]),font=("Arail", 10))
+
+        def initMenu():
+            menubar = Menu(self)
+            self.config(menu=menubar)
+
+            fileMenu = Menu(menubar, tearoff=False)
+            fileMenu.add_command(label="Налаштування",command=settings)
+            fileMenu.add_command(label="Вийти",command=lambda: self.quit())
+
+            helpMenu = Menu(menubar, tearoff=False)
+            helpMenu.add_command(label="Інструкція",command=showTutorial)
+            helpMenu.add_command(label="Про програму",command=showAbout)
+
+            menubar.add_cascade(label="Файл", menu=fileMenu)
+            menubar.add_cascade(label="Допомога", menu=helpMenu)
+        
+        def initMenuEvents():
+            self.bind('<Control-q>',lambda i: self.quit())
+            self.bind('<Control-,>',lambda i: settings())
+            self.bind('<Control-h>',lambda i: showTutorial())
 
         cLineEnable = IntVar()
         funcType = IntVar()
@@ -335,7 +405,6 @@ class MainWindow(Tk):
         enableDataDrawing.set(0)
         invertCanvas.set(0)
         myFuncVar.set(self.my_func)
-
         animVar.trace_add("write",animate)
         
         canvas = Canvas(self, width = self.width, height = self.height,borderwidth=2, relief="groove")
@@ -346,9 +415,9 @@ class MainWindow(Tk):
         bs3 = ButtonSlider(controlFrame,5,self.y_amp,500,5,'Амплітуда Y',bs3_change)
         bs4 = ButtonSlider(controlFrame,0.01,self.x_bias,30,-30,'Зміщення Х',bs4_change)
         s1  = Scale(controlFrame,from_=0,to=249,orient=HORIZONTAL,variable=animVar,length=180)
-        b1  = Button(controlFrame,text='Оновити',command=update,width=16)
+        #b1  = Button(controlFrame,text='Допомога',command=showTutorial,width=16)
         b2  = Button(controlFrame,text='Показати JSON',command=showJson,state=DISABLED,width=16)
-        b3  = Button(controlFrame,text='Налаштування',command=settings,width=16)
+        #b3  = Button(controlFrame,text='Налаштування',command=settings,width=16)
         c1  = Checkbutton(controlFrame,text='Відображати центральну лінію',onvalue=1,offvalue=0,variable=cLineEnable)
         c2  = Checkbutton(controlFrame,text='Відображати вертикальну лінію',onvalue=1,offvalue=0,variable=cVertEnable)
         r1  = Radiobutton(controlFrame,text='sin(x)',variable=funcType,value=0)
@@ -360,8 +429,12 @@ class MainWindow(Tk):
         lb1 = Listbox(controlFrame,width=31,height=8)
         
         lb1.bind('<<ListboxSelect>>',listSelect)
-        self.bind('<Configure>',conf)
+        e1.bind('<Return>',e1_ret)
+        self.bind("<Visibility>", update)
+        canvas.bind('<Motion>',canvas_motion)
         canvas.pack(side=LEFT,fill=BOTH,expand=1)
+        
+        
         funcType.trace_add('write',func_write)
         drawGrid()
         drawLines()
@@ -383,16 +456,18 @@ class MainWindow(Tk):
         e1.grid(column=0,row=13,sticky=NW,padx=(20,0))
         Label(controlFrame,text='Точки:').grid(column=0,row=14,sticky=NW)
         lb1.grid(column=0,row=15,sticky=NW)
-        b3.grid()
+        #b3.grid()
         b2.grid()
-        b1.grid()
+        #b1.grid()
 
         showTutorial()
+        initMenu()
+        initMenuEvents()
         
 
 if __name__ == '__main__':
     app = MainWindow(None)
-    #app.resizable(False, False)
+    app.resizable(False, False)
     app.title('Графік функцій')
     app.geometry('800x642')
     app.eval('tk::PlaceWindow . center')
