@@ -11,7 +11,6 @@ class Tri:
         self.a += a
         self.b += b
         self.c += c
-
 class TriDouble(Tri):
     def square(self):
         s = self.peri()/2
@@ -20,10 +19,8 @@ class TriDouble(Tri):
         return (self.a * 2) + self.c
     def changeSide(self,a,b,c):
         Tri.changeSide(self,a,b,c)
-
 obj1 = Tri(2,3,4)
 obj2 = TriDouble(7,7,12)
-
 print(obj1.square())
 print(obj2.square())
 obj1.changeSide(1,0,0)

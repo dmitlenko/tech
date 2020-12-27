@@ -16,7 +16,6 @@ class Table:
     def out(self):
         print('Книга і лист займають %icm^2'%(self.book.sq + self.sheet.sq))
         print('Вільного місця %icm^2'%self.calculate)
-
 obj1 = Table(int(input('l = ')),int(input('p = ')))
 obj1.objects(12,7,8,4)
 obj1.calculate()

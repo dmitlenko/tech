@@ -10,7 +10,6 @@ class Book:
     def __del__(self):
         print('Екземпляр знищений')
         self = None
-
 class SuBook(Book):
     cost = 0
     def __init__(self,t,y,a,c):
@@ -27,7 +26,6 @@ class SuBook(Book):
         print('Рік:',self.year)
         print('Автор:',self.author)
         print('Ціна:',self.cost,'грн.')
-
 obj1 = SuBook('Велика Книга Знань',2012,'Махаон-Україна',315)
 obj2 = SuBook('Pусские сказки',2009,'Ранок',210)
 print(obj1.allYear(),obj2.allYear())

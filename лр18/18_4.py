@@ -9,7 +9,6 @@ class sub_StringWorker(StringWorker):
         return list(self.s)
     def sort(self):
         return sorted(self.list())
-    
 obj1 = StringWorker(r)
 obj2 = sub_StringWorker(r)
 print('слова:',obj1.list())
