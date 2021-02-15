@@ -80,114 +80,6 @@ class TextScroll(Frame):
         scrollb.grid(row=0, column=1, sticky='nsew')
         self.txt['yscrollcommand'] = scrollb.set
 
-class Settings(Toplevel):
-    def __init__(self,master,callback):
-        Toplevel.__init__(self)
-        def apply():
-            self.func_color = drop3_var.get()
-            self.grid_color = drop1_var.get()
-            self.lines_color= drop2_var.get()
-            self.destroy()
-            callback(self)
-
-        def updateShow(*args):
-            try:
-                show1.config(background=drop1_var.get())
-                show2.config(background=drop2_var.get())
-                show3.config(background=drop3_var.get())
-            except: pass
-
-        self.resizable(False, False)
-        self.title('Налаштування')
-        self.geometry('290x190')
-        master.eval(f'tk::PlaceWindow {str(self)} center')
-
-        drop1_var = StringVar()
-        drop2_var = StringVar()
-        drop3_var = StringVar()
-
-        drop1_var.trace_add('write',updateShow)
-        drop2_var.trace_add('write',updateShow)
-        drop3_var.trace_add('write',updateShow)
-
-        drop_width = 8
-
-        drop1_var.set(master.grid_color)
-        drop2_var.set(master.lines_color)
-        drop3_var.set(master.func_color)
-
-        colors = lambda f,df: [f,df,"#ed254e","#69dc9e","#ca7df9","#250001","#335c67"]
-
-        drop1 = OptionMenu(self,drop1_var,*colors(master.grid_color,master.default_grid_color))
-        drop2 = OptionMenu(self,drop2_var,*colors(master.lines_color,master.default_lines_color))
-        drop3 = OptionMenu(self,drop3_var,*colors(master.func_color,master.default_lines_color))
-        chec1 = Checkbutton(self,text='Дод. інфо.',onvalue=1,offvalue=0,variable=master.enableDataDrawing)
-        chec2 = Checkbutton(self,text='Темна тема',onvalue=1,offvalue=0,variable=master.invertCanvas)
-        show1 = Label(self,text='',width=drop_width)
-        show2 = Label(self,text='',width=drop_width)
-        show3 = Label(self,text='',width=drop_width)
-        apply = Button(self,text='Примінити',command=apply)
-
-        drop1.config(width=drop_width)
-        drop2.config(width=drop_width)
-        drop3.config(width=drop_width)
-
-        Label(self,text='Колір сітки:').grid(column=0,row=0,sticky="ew",padx=10,pady=10)
-        drop1.grid(column=1,row=0,sticky="ew",padx=10,pady=10)
-        show1.grid(column=2,row=0,sticky="ew",padx=10,pady=10)
-        Label(self,text='Колір ліній:').grid(column=0,row=1,sticky="ew",padx=10,pady=10)
-        drop2.grid(column=1,row=1,sticky="ew",padx=10,pady=10)
-        show2.grid(column=2,row=1,sticky="ew",padx=10,pady=10)
-        Label(self,text='Колір функції:').grid(column=0,row=2,sticky="ew",padx=10,pady=10)
-        drop3.grid(column=1,row=2,sticky="ew",padx=10,pady=10)
-        show3.grid(column=2,row=2,sticky="ew",padx=10,pady=10)
-        chec1.grid(column=0,row=3)
-        chec2.grid(column=1,row=3)
-        apply.grid(column=2,row=4)
-
-        updateShow()
-
-class Tutorial(Toplevel):
-    def __init__(self,master):
-        Toplevel.__init__(self)
-        tutorial_text = """
-        \tІнкремент Х - дає змогу змінити збільшити якість зображеної функції.\n
-        \tФактор Х - дає змогу змінити частоту функції.\n
-        \tАмплітуда Y - дає змогу змінити амплітуду функції.\n
-        \tЗміщення Х - дає змогу точніше здвинути функцію по ОХ.\n
-        \tАнімувати - при зміні анімує функцію.\n
-        \tВідображати центральну лінію - при активному стані кожне оновлення
-        малюється горизонтальна центральна лінія.\n
-        \tВідображати вертикальну лінію - при активному стані кожне оновлення
-        малюється вертикальна центральна лінія.\n
-        \tФункція: sin(x),cos(x)... - дає змогу вибрати тип зображуваної функції.\n
-        \tТочки - список всіх точок на графіку. При виборі точки, вона 
-        зображується на графіку.\n
-        \tНалаштування - кнопка, яка показує вікно налаштувань.\n
-        \tПоказати JSON - кнопка, яка показує координати всіх точок у форматі JSON.\n
-        """
-        self.geometry('480x400')
-        self.resizable(False,False)
-        self.attributes('-topmost','true')
-        self.title('Як користуватися')
-        Label(self,text=tutorial_text).pack(fill=BOTH,expand=0)
-        master.eval(f'tk::PlaceWindow {str(self)} center')
-
-class About(Toplevel):
-    def __init__(self,master):
-        Toplevel.__init__(self)
-        about = """
-        Графік функції
-        Створив Денис Мітленко
-        2020 рік
-        """
-        self.geometry('280x80')
-        self.resizable(False,False)
-        self.attributes('-topmost','true')
-        self.title('Про програму')
-        Label(self,text=about).pack(fill=BOTH,expand=0)
-        master.eval(f'tk::PlaceWindow {str(self)} center')
-
 class MainWindow(Tk):
 
     x_inc = 1
@@ -334,6 +226,72 @@ class MainWindow(Tk):
             except:
                 top.withdraw()
 
+        def settings():
+            def apply():
+                self.func_color = drop3_var.get()
+                self.grid_color = drop1_var.get()
+                self.lines_color= drop2_var.get()
+                sett.destroy()
+                update()
+
+            def updateShow(*args):
+                try:
+                    show1.config(background=drop1_var.get())
+                    show2.config(background=drop2_var.get())
+                    show3.config(background=drop3_var.get())
+                except: pass
+
+            sett = Toplevel(self)
+            sett.resizable(False, False)
+            sett.title('Налаштування')
+            sett.geometry('290x190')
+            self.eval(f'tk::PlaceWindow {str(sett)} center')
+
+            drop1_var = StringVar()
+            drop2_var = StringVar()
+            drop3_var = StringVar()
+
+            drop1_var.trace_add('write',updateShow)
+            drop2_var.trace_add('write',updateShow)
+            drop3_var.trace_add('write',updateShow)
+
+            drop_width = 8
+
+            drop1_var.set(self.grid_color)
+            drop2_var.set(self.lines_color)
+            drop3_var.set(self.func_color)
+
+            colors = lambda f,df: [f,df,"#ed254e","#69dc9e","#ca7df9","#250001","#335c67"]
+
+            drop1 = OptionMenu(sett,drop1_var,*colors(self.grid_color,self.default_grid_color))
+            drop2 = OptionMenu(sett,drop2_var,*colors(self.lines_color,self.default_lines_color))
+            drop3 = OptionMenu(sett,drop3_var,*colors(self.func_color,self.default_lines_color))
+            chec1 = Checkbutton(sett,text='Дод. інфо.',onvalue=1,offvalue=0,variable=enableDataDrawing)
+            chec2 = Checkbutton(sett,text='Темна тема',onvalue=1,offvalue=0,variable=invertCanvas)
+            show1 = Label(sett,text='',width=drop_width)
+            show2 = Label(sett,text='',width=drop_width)
+            show3 = Label(sett,text='',width=drop_width)
+            apply = Button(sett,text='Примінити',command=apply)
+
+            drop1.config(width=drop_width)
+            drop2.config(width=drop_width)
+            drop3.config(width=drop_width)
+
+            Label(sett,text='Колір сітки:').grid(column=0,row=0,sticky="ew",padx=10,pady=10)
+            drop1.grid(column=1,row=0,sticky="ew",padx=10,pady=10)
+            show1.grid(column=2,row=0,sticky="ew",padx=10,pady=10)
+            Label(sett,text='Колір ліній:').grid(column=0,row=1,sticky="ew",padx=10,pady=10)
+            drop2.grid(column=1,row=1,sticky="ew",padx=10,pady=10)
+            show2.grid(column=2,row=1,sticky="ew",padx=10,pady=10)
+            Label(sett,text='Колір функції:').grid(column=0,row=2,sticky="ew",padx=10,pady=10)
+            drop3.grid(column=1,row=2,sticky="ew",padx=10,pady=10)
+            show3.grid(column=2,row=2,sticky="ew",padx=10,pady=10)
+            chec1.grid(column=0,row=3)
+            chec2.grid(column=1,row=3)
+            apply.grid(column=2,row=4)
+
+            updateShow()
+
         def animate(*args):
             self.anim = animVar.get()/40
             update()
@@ -358,6 +316,45 @@ class MainWindow(Tk):
             l1.configure(state=a)
             update()
 
+        def showTutorial():
+            tutorial_text = """
+            \tІнкремент Х - дає змогу змінити збільшити якість зображеної функції.\n
+            \tФактор Х - дає змогу змінити частоту функції.\n
+            \tАмплітуда Y - дає змогу змінити амплітуду функції.\n
+            \tЗміщення Х - дає змогу точніше здвинути функцію по ОХ.\n
+            \tАнімувати - при зміні анімує функцію.\n
+            \tВідображати центральну лінію - при активному стані кожне оновлення
+            малюється горизонтальна центральна лінія.\n
+            \tВідображати вертикальну лінію - при активному стані кожне оновлення
+            малюється вертикальна центральна лінія.\n
+            \tФункція: sin(x),cos(x)... - дає змогу вибрати тип зображуваної функції.\n
+            \tТочки - список всіх точок на графіку. При виборі точки, вона 
+            зображується на графіку.\n
+            \tНалаштування - кнопка, яка показує вікно налаштувань.\n
+            \tПоказати JSON - кнопка, яка показує координати всіх точок у форматі JSON.\n
+            """
+            self.tut = tut = Toplevel(self)
+            tut.geometry('480x400')
+            tut.resizable(False,False)
+            tut.attributes('-topmost','true')
+            tut.title('Як користуватися')
+            Label(tut,text=tutorial_text).pack(fill=BOTH,expand=0)
+            self.eval(f'tk::PlaceWindow {str(tut)} center')
+
+        def showAbout():
+            about = """
+            Графік функції
+            Створив Денис Мітленко
+            2020 рік
+            """
+            ab = Toplevel(self)
+            ab.geometry('280x80')
+            ab.resizable(False,False)
+            ab.attributes('-topmost','true')
+            ab.title('Про програму')
+            Label(ab,text=about).pack(fill=BOTH,expand=0)
+            self.eval(f'tk::PlaceWindow {str(ab)} center')
+
         def e1_ret(*args):
             self.my_func = myFuncVar.get()
             update()
@@ -378,20 +375,20 @@ class MainWindow(Tk):
             self.config(menu=menubar)
 
             fileMenu = Menu(menubar, tearoff=False)
-            fileMenu.add_command(label="Налаштування",command=lambda: Settings(self,update))
+            fileMenu.add_command(label="Налаштування",command=settings)
             fileMenu.add_command(label="Вийти",command=lambda: self.quit())
 
             helpMenu = Menu(menubar, tearoff=False)
-            helpMenu.add_command(label="Інструкція",command=lambda:Settings(self,update))
-            helpMenu.add_command(label="Про програму",command=lambda: About(self))
+            helpMenu.add_command(label="Інструкція",command=showTutorial)
+            helpMenu.add_command(label="Про програму",command=showAbout)
 
             menubar.add_cascade(label="Файл", menu=fileMenu)
             menubar.add_cascade(label="Допомога", menu=helpMenu)
         
         def initMenuEvents():
             self.bind('<Control-q>',lambda i: self.quit())
-            self.bind('<Control-,>',lambda i: Settings(self,update))
-            self.bind('<Control-h>',lambda i: Tutorial(self))
+            self.bind('<Control-,>',lambda i: settings())
+            self.bind('<Control-h>',lambda i: showTutorial())
 
         cLineEnable = IntVar()
         funcType = IntVar()
@@ -418,7 +415,9 @@ class MainWindow(Tk):
         bs3 = ButtonSlider(controlFrame,5,self.y_amp,500,5,'Амплітуда Y',bs3_change)
         bs4 = ButtonSlider(controlFrame,0.01,self.x_bias,30,-30,'Зміщення Х',bs4_change)
         s1  = Scale(controlFrame,from_=0,to=249,orient=HORIZONTAL,variable=animVar,length=180)
+        #b1  = Button(controlFrame,text='Допомога',command=showTutorial,width=16)
         b2  = Button(controlFrame,text='Показати JSON',command=showJson,state=DISABLED,width=16)
+        #b3  = Button(controlFrame,text='Налаштування',command=settings,width=16)
         c1  = Checkbutton(controlFrame,text='Відображати центральну лінію',onvalue=1,offvalue=0,variable=cLineEnable)
         c2  = Checkbutton(controlFrame,text='Відображати вертикальну лінію',onvalue=1,offvalue=0,variable=cVertEnable)
         r1  = Radiobutton(controlFrame,text='sin(x)',variable=funcType,value=0)
@@ -457,9 +456,11 @@ class MainWindow(Tk):
         e1.grid(column=0,row=13,sticky=NW,padx=(20,0))
         Label(controlFrame,text='Точки:').grid(column=0,row=14,sticky=NW)
         lb1.grid(column=0,row=15,sticky=NW)
+        #b3.grid()
         b2.grid()
+        #b1.grid()
 
-        Tutorial(self)
+        showTutorial()
         initMenu()
         initMenuEvents()
         
